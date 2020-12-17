@@ -27,7 +27,7 @@ jobs:
       - name: build and test
         uses: fmrico/action-ros-ci@0.1.1
         with:
-          package-name: plansys2_tfd_plan_solver plansys2_planner
+          package-name: plansys2_tfd_plan_solver
           target-ros2-distro: foxy
           vcs-repo-file-url: /tmp/all.repos
           colcon-mixin-name: coverage-gcc
