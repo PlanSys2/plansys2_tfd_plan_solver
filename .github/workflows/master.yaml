@@ -1,0 +1,49 @@
+name: master
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+      
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+      fail-fast: false
+    steps:
+      - name: Install popf deps
+        run: sudo apt-get install libfl-dev
+      - name: Setup ROS 2
+        uses: ros-tooling/setup-ros@0.1.1
+        with:
+          required-ros-distributions: foxy
+      - name: Install TFD
+        run: mkdir /tmp/tfd && cd /tmp/tfd && wget "http://gki.informatik.uni-freiburg.de/tools/tfd/downloads/version-0.4/tfd-src-0.4.tgz" && tar xzf "tfd-src-0.4.tgz" && cd "tfd-src-0.4" && sed -e s/"-Werror"//g -i ./downward/search/Makefile && ./build
+      - name: set environment for finding TFD
+        uses: allenevans/set-env@v2.0.0
+        with:
+          TFD_HOME: '/tmp/tfd/tfd-src-0.4/downward'    
+      - name: Create custom repos
+        run: wget -O /tmp/all.repos https://raw.githubusercontent.com/IntelligentRoboticsLabs/plansys2_tfd_plan_solver/master/plansys2.repos  
+      - name: build and test
+        uses: fmrico/action-ros-ci@0.1.1
+        with:
+          package-name: plansys2_tfd_plan_solver
+          target-ros2-distro: foxy
+          vcs-repo-file-url: /tmp/all.repos
+          colcon-mixin-name: coverage-gcc
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+      - uses: codecov/codecov-action@v1.0.15
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ros_ws/lcov/total_coverage.info
+          flags: unittests
+          name: codecov-umbrella
+          yml: ./codecov.yml
+          fail_ci_if_error: false
+
