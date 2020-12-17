@@ -41,11 +41,12 @@ TFDPlanSolver::configure(rclcpp_lifecycle::LifecycleNode::SharedPtr & node, cons
 
   if (planner_path == NULL) {
     RCLCPP_FATAL(node->get_logger(), "'TFD_HOME' end not defined for %s", id.c_str());
-  } else {
-    tfd_path_ = std::string(planner_path);
-    RCLCPP_INFO(node->get_logger(), "Planner path set to: %s", tfd_path_.c_str());
+    exit(-1);
   }
 
+  tfd_path_ = std::string(planner_path);
+
+  RCLCPP_INFO(node->get_logger(), "Planner path set to: %s", tfd_path_.c_str());
 }
 
 boost::optional<Plan>

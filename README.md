@@ -13,6 +13,6 @@ To install `Temporal Fast TFD` in a the $TFD_HOME directory:
 3. `wget "http://gki.informatik.uni-freiburg.de/tools/tfd/downloads/version-0.4/tfd-src-0.4.tgz"`
 4. `tar xzf "tfd-src-0.4.tgz"`
 5. `cd "tfd-src-0.4"`
-6. `sed -e s/"-Werror"//g -i ./tfd/search/Makefile`
+6. `sed -e s/"-Werror"//g -i ./downward/search/Makefile`
 7. `./build`
 8. Add an `export TFD_HOME=` to ~.bashrc that points to the `downward` directory.
