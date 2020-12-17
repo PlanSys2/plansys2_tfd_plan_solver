@@ -22,10 +22,10 @@ jobs:
         uses: ros-tooling/setup-ros@0.1.1
         with:
           required-ros-distributions: foxy
-      - name: ls 1
-        run: ls
-      - name: ls 2
-        run: ls src
+      - name: PWD
+        run: pwd
+      - name: Create src
+        run: mkdir src
       - name: Get PlanSys2 master
         run: vcs import src < src/plansys2_tfd_plan_solver/plansys2.repos
       - name: build and test

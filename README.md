@@ -1,5 +1,9 @@
 # Temporal Fast Downward Plan solver
 
+[![GitHub Action
+Status](https://github.com/IntelligentRoboticsLabs/ros2_planning_system/workflows/master/master.svg)](https://github.com/IntelligentRoboticsLabs/ros2_planning_system)
+[![codecov](https://codecov.io/gh/IntelligentRoboticsLabs/ros2_planning_system/master/graph/badge.svg)](https://codecov.io/gh/IntelligentRoboticsLabs/ros2_planning_system)
+
 This package contains a plan solver that uses [Temporal Fast Downward](http://gki.informatik.uni-freiburg.de/tools/tfd/) for solving PDDL plans.
 
 To install `Temporal Fast TFD` in a the $TFD_HOME directory:
