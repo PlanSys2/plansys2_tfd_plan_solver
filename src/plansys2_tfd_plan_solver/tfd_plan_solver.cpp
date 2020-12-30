@@ -49,7 +49,7 @@ TFDPlanSolver::configure(rclcpp_lifecycle::LifecycleNode::SharedPtr & node, cons
   RCLCPP_INFO(node->get_logger(), "Planner path set to: %s", tfd_path_.c_str());
 }
 
-boost::optional<Plan>
+std::optional<Plan>
 TFDPlanSolver::getPlan(
   const std::string & domain, const std::string & problem,
   const std::string & node_namespace)
