@@ -17,7 +17,7 @@ To install `Temporal Fast TFD` in a the $TFD_HOME directory:
 7. `./build`
 8. Add an `export TFD_HOME=` to ~.bashrc that points to the `downward` directory.
 
-### execute tfd
+### Manual execution of TFD
 
 1. `python2.7 $TFD_HOME/translate/translate.py [domain_name].pddl [problem_name].pddl`
 2. `$TFD_HOME/preprocess/preprocess < output.sas`
