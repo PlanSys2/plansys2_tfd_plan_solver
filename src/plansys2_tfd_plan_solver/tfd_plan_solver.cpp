@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <fstream>
 
+#include "plansys2_msgs/msg/plan_item.hpp"
 #include "plansys2_tfd_plan_solver/tfd_plan_solver.hpp"
 
 #include "pluginlib/class_list_macros.hpp"
@@ -49,7 +50,7 @@ TFDPlanSolver::configure(rclcpp_lifecycle::LifecycleNode::SharedPtr & node, cons
   RCLCPP_INFO(node->get_logger(), "Planner path set to: %s", tfd_path_.c_str());
 }
 
-std::optional<Plan>
+std::optional<plansys2_msgs::msg::Plan>
 TFDPlanSolver::getPlan(
   const std::string & domain, const std::string & problem,
   const std::string & node_namespace)
@@ -61,7 +62,7 @@ TFDPlanSolver::getPlan(
     mkdir(("/tmp/" + node_namespace).c_str(), ACCESSPERMS);
   }
 
-  Plan ret;
+  plansys2_msgs::msg::Plan ret;
   std::ofstream domain_out("/tmp/" + node_namespace + "/domain.pddl");
   domain_out << domain;
   domain_out.close();
@@ -99,7 +100,7 @@ TFDPlanSolver::getPlan(
 
   if (plan_file.is_open()) {
     while (getline(plan_file, line)) {
-      PlanItem item;
+      plansys2_msgs::msg::PlanItem item;
       size_t colon_pos = line.find(":");
       size_t colon_par = line.find(")");
       size_t colon_bra = line.find("[");
@@ -113,7 +114,7 @@ TFDPlanSolver::getPlan(
       item.action = action;
       item.duration = std::stof(duration);
 
-      ret.push_back(item);
+      ret.items.push_back(item);
     }
     plan_file.close();
   }
@@ -122,7 +123,7 @@ TFDPlanSolver::getPlan(
   system("mv /tmp/pddlplan.1 /tmp/pddlplan.1.last");
   system("mv /tmp/output.sas /tmp/output.sas.last");
 
-  if (ret.empty()) {
+  if (ret.items.empty()) {
     return {};
   } else {
     return ret;
