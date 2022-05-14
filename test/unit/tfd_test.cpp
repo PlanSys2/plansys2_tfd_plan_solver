@@ -42,10 +42,10 @@ TEST(tfd_plan_solver, generate_plan_good)
   auto plan = planner->getPlan(domain_str, problem_str);
 
   ASSERT_TRUE(plan);
-  ASSERT_EQ(plan.value().size(), 3);
-  ASSERT_EQ(plan.value()[0].action, "(move leia kitchen bedroom)");
-  ASSERT_EQ(plan.value()[1].action, "(approach leia bedroom jack)");
-  ASSERT_EQ(plan.value()[2].action, "(talk leia jack jack m1)");
+  ASSERT_EQ(plan.value().items.size(), 3);
+  ASSERT_EQ(plan.value().items[0].action, "(move leia kitchen bedroom)");
+  ASSERT_EQ(plan.value().items[1].action, "(approach leia bedroom jack)");
+  ASSERT_EQ(plan.value().items[2].action, "(talk leia jack jack m1)");
 }
 
 TEST(tfd_plan_solver, generate_plan_unsolvable)
