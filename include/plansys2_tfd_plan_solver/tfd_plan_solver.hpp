@@ -31,7 +31,7 @@ public:
 
   void configure(rclcpp_lifecycle::LifecycleNode::SharedPtr & node, const std::string & id);
 
-  std::optional<Plan> getPlan(
+  std::optional<plansys2_msgs::msg::Plan> getPlan(
     const std::string & domain, const std::string & problem,
     const std::string & node_namespace = "");
 
