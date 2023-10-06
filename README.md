@@ -6,19 +6,20 @@ Status](https://github.com/IntelligentRoboticsLabs/plansys2_tfd_plan_solver/work
 
 This package contains a plan solver that uses [Temporal Fast Downward](http://gki.informatik.uni-freiburg.de/tools/tfd/) for solving PDDL plans.
 
-To install `Temporal Fast TFD` in a the $TFD_HOME directory:
+To install Temporal Fast Downward (TFD) to work with PlanSys2:
 
-1. `mkdir -p $TFD_HOME`
-2. `cd $TFD_HOME`
-3. `wget "http://gki.informatik.uni-freiburg.de/tools/tfd/downloads/version-0.4/tfd-src-0.4.tgz"`
-4. `tar xzf "tfd-src-0.4.tgz"`
-5. `cd "tfd-src-0.4"`
-6. `sed -e s/"-Werror"//g -i ./downward/search/Makefile`
-7. `./build`
-8. Add an `export TFD_HOME=` to ~.bashrc that points to the `downward` directory.
+1. Pick an installation folder, e.g., `${HOME}/plansys2`
+2. `mkdir -p ${HOME}/plansys2`
+3. `cd ${HOME}/plansys2`
+4. `git clone https://github.com/sea-bass/TemporalFastDownward.git`
+5. `cd TemporalFastDownward`
+6. `./build`
+7. Export a `$TFD_HOME` environment variable that points to the `downward` directory, e.g., `export TFD_HOME=${HOME}/plansys2/TemporalFastDownward/downward`.
+8. (Optional) Add the above export statement to your `~/.bashrc` file.
 
 ### Manual execution of TFD
 
-1. `python2.7 $TFD_HOME/translate/translate.py [domain_name].pddl [problem_name].pddl`
+1. `python3 $TFD_HOME/translate/translate.py [domain_name].pddl [problem_name].pddl`
 2. `$TFD_HOME/preprocess/preprocess < output.sas`
 3. `$TFD_HOME/search/search y Y a T 10 t 5 e r O 1 C 1 p $TFD_HOME/plan < output`
+4. `cat pddlplan.1`

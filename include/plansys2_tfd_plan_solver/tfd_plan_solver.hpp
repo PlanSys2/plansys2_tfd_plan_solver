@@ -29,14 +29,20 @@ class TFDPlanSolver : public PlanSolverBase
 public:
   TFDPlanSolver();
 
-  void configure(rclcpp_lifecycle::LifecycleNode::SharedPtr & node, const std::string & id);
+  void configure(rclcpp_lifecycle::LifecycleNode::SharedPtr, const std::string &);
 
   std::optional<plansys2_msgs::msg::Plan> getPlan(
     const std::string & domain, const std::string & problem,
     const std::string & node_namespace = "");
 
+  bool isDomainValid(
+    const std::string & domain,
+    const std::string & node_namespace = "");
+
 private:
   std::string tfd_path_;
+  std::string output_dir_parameter_name_;
+  rclcpp_lifecycle::LifecycleNode::SharedPtr lc_node_;
 };
 
 }  // namespace plansys2
