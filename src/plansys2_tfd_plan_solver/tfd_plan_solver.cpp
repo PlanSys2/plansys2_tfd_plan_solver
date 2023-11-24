@@ -101,7 +101,11 @@ TFDPlanSolver::getPlan(
     RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to translate domain and problem files.");
     return {};
   }
-  system(("mv output.sas " + output_sas_file_path.string()).c_str());
+  status = system(("mv output.sas " + output_sas_file_path.string()).c_str());
+  if (status == -1) {
+    RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to copy output.sas file to output folder.");
+    return {};
+  }
 
   // Preprocess the translated files.
   const auto processed_output_file_path = output_dir / std::filesystem::path("output");
@@ -112,7 +116,11 @@ TFDPlanSolver::getPlan(
     RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to preprocess files.");
     return {};
   }
-  system(("mv output " + processed_output_file_path.string()).c_str());
+  status = system(("mv output " + processed_output_file_path.string()).c_str());
+  if (status == -1) {
+    RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to copy output file to output folder.");
+    return {};
+  }
 
   // Search for a plan using TFD
   const auto pddlplan_file_path = output_dir / std::filesystem::path("pddlplan");
@@ -151,15 +159,29 @@ TFDPlanSolver::getPlan(
   }
 
   // Save all the output files with a ".last" mangle.
-  system(
+  status = system(
     ("mv " + output_sas_file_path.string() + " " +
     output_sas_file_path.string() + ".last").c_str());
-  system(
+  if (status == -1) {
+    RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to copy backup of last output.sas file.");
+    return {};
+  }
+
+  status = system(
     ("mv " + processed_output_file_path.string() + " " +
     processed_output_file_path.string() + ".last").c_str());
-  system(
+  if (status == -1) {
+    RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to copy backup of last output file.");
+    return {};
+  }
+
+  status = system(
     ("mv " + pddlplan_file_path.string() + ".1 " +
     pddlplan_file_path.string() + ".1.last").c_str());
+  if (status == -1) {
+    RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to copy backup of last pddlplan file.");
+    return {};
+  }
 
   if (ret.items.empty()) {
     return {};
@@ -229,7 +251,11 @@ TFDPlanSolver::isDomainValid(
     RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to translate domain and problem files.");
     return false;
   }
-  system(("mv output.sas " + output_val_file_path.string()).c_str());
+  status = system(("mv output.sas " + output_val_file_path.string()).c_str());
+  if (status == -1) {
+    RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to copy backup of last output.sas file.");
+    return {};
+  }
 
   return true;
 }
