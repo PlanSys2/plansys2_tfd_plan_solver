@@ -58,7 +58,7 @@ std::optional<plansys2_msgs::msg::Plan>
 TFDPlanSolver::getPlan(
   const std::string & domain, const std::string & problem,
   const std::string & node_namespace,
-  const int solver_timeout)
+  const rclcpp::Duration solver_timeout)
 {
   if (system(nullptr) == 0) {
     return {};
@@ -93,7 +93,7 @@ TFDPlanSolver::getPlan(
   problem_out.close();
 
   RCLCPP_INFO(lc_node_->get_logger(), "[%s-tfd] called with timeout %d seconds",
-+             lc_node_->get_name(), solver_timeout);
++             lc_node_->get_name(), solver_timeout.seconds());
 
   // Translate the domain and problem files to SAS.
   const auto output_sas_file_path = output_dir / std::filesystem::path("output.sas");
