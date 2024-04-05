@@ -21,7 +21,8 @@
 
 #include "plansys2_core/PlanSolverBase.hpp"
 
-using namespace std::chrono_literals;
+// using namespace std::chrono_literals;
+using std::chrono_literals::operator""s;
 
 namespace plansys2
 {
