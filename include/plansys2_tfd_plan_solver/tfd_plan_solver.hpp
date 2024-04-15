@@ -21,6 +21,9 @@
 
 #include "plansys2_core/PlanSolverBase.hpp"
 
+// using namespace std::chrono_literals;
+using std::chrono_literals::operator""s;
+
 namespace plansys2
 {
 
@@ -33,7 +36,8 @@ public:
 
   std::optional<plansys2_msgs::msg::Plan> getPlan(
     const std::string & domain, const std::string & problem,
-    const std::string & node_namespace = "");
+    const std::string & node_namespace = "",
+    const rclcpp::Duration solver_timeout = 15s);
 
   bool isDomainValid(
     const std::string & domain,
