@@ -15,8 +15,8 @@
 #ifndef PLANSYS2_TFD_PLAN_SOLVER__TFD_PLAN_SOLVER_HPP_
 #define PLANSYS2_TFD_PLAN_SOLVER__TFD_PLAN_SOLVER_HPP_
 
-#include <optional>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "plansys2_core/PlanSolverBase.hpp"
@@ -26,7 +26,6 @@ using std::chrono_literals::operator""s;
 
 namespace plansys2
 {
-
 class TFDPlanSolver : public PlanSolverBase
 {
 public:
@@ -44,6 +43,7 @@ public:
 private:
   std::string tfd_path_;
   std::string output_dir_parameter_name_;
+  std::string generated_plan_num_name_;
   rclcpp_lifecycle::LifecycleNode::SharedPtr lc_node_;
 };
 

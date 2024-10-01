@@ -15,20 +15,21 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <regex>
 #include <string>
 
 #include "plansys2_msgs/msg/plan_item.hpp"
 #include "plansys2_tfd_plan_solver/tfd_plan_solver.hpp"
 
+namespace fs = std::filesystem;
+
 namespace plansys2
 {
-
 TFDPlanSolver::TFDPlanSolver()
 {
 }
@@ -39,8 +40,10 @@ void TFDPlanSolver::configure(rclcpp_lifecycle::LifecycleNode::SharedPtr lc_node
   lc_node_ = lc_node;
 
   output_dir_parameter_name_ = plugin_name + ".output_dir";
-  lc_node_->declare_parameter<std::string>(output_dir_parameter_name_,
-                                           std::filesystem::temp_directory_path());
+  lc_node_->declare_parameter<std::string>(output_dir_parameter_name_, fs::temp_directory_path());
+
+  generated_plan_num_name_ = plugin_name + ".plan_num";
+  lc_node_->declare_parameter<int>(generated_plan_num_name_, 1);
 
   char* planner_path = getenv("TFD_HOME");
   if (planner_path == NULL)
@@ -52,6 +55,33 @@ void TFDPlanSolver::configure(rclcpp_lifecycle::LifecycleNode::SharedPtr lc_node
   tfd_path_ = std::string(planner_path);
 }
 
+fs::path get_home_directory()
+{
+  // Get the HOME environment variable (works on Linux/macOS)
+  const char* home = std::getenv("HOME");
+  if (home == nullptr)
+  {
+    // Fallback to current directory if HOME is not set (e.g., on non-Unix platforms)
+    return fs::current_path();
+  }
+  return fs::path(home);
+}
+
+std::string get_absolute_path(const std::string& path_str)
+{
+  fs::path file_path = path_str;
+
+  if (!file_path.is_absolute())
+  {
+    fs::path home_dir = get_home_directory();
+    std::cout << "The provided path is not absolute. Using the home directory: " << home_dir
+              << "\n";
+    file_path = home_dir / file_path;
+  }
+
+  return file_path;
+}
+
 std::optional<plansys2_msgs::msg::Plan>
 TFDPlanSolver::getPlan(const std::string& domain, const std::string& problem,
                        const std::string& node_namespace, const rclcpp::Duration solver_timeout)
@@ -61,41 +91,45 @@ TFDPlanSolver::getPlan(const std::string& domain, const std::string& problem,
     return {};
   }
 
-  auto output_dir =
-      std::filesystem::path(lc_node_->get_parameter(output_dir_parameter_name_).value_to_string());
+  auto output_dir = fs::path(lc_node_->get_parameter(output_dir_parameter_name_).value_to_string());
+
+  auto generated_plan_num = lc_node_->get_parameter(generated_plan_num_name_).as_int();
 
   if (node_namespace != "")
   {
-    for (auto p : std::filesystem::path(node_namespace))
+    for (auto p : fs::path(node_namespace))
     {
-      if (p != std::filesystem::current_path().root_directory())
+      if (p != fs::current_path().root_directory())
       {
         output_dir /= p;
       }
     }
-    std::filesystem::create_directories(output_dir);
+    fs::create_directories(output_dir);
   }
+
+  output_dir = get_absolute_path(output_dir);
+
   RCLCPP_INFO(lc_node_->get_logger(), "Writing planning results to %s.",
               output_dir.string().c_str());
 
   int status;
   plansys2_msgs::msg::Plan ret;
 
-  const auto domain_file_path = output_dir / std::filesystem::path("domain.pddl");
+  const auto domain_file_path = output_dir / fs::path("domain.pddl");
   std::ofstream domain_out(domain_file_path);
   domain_out << domain;
   domain_out.close();
 
-  const auto problem_file_path = output_dir / std::filesystem::path("problem.pddl");
+  const auto problem_file_path = output_dir / fs::path("problem.pddl");
   std::ofstream problem_out(problem_file_path);
   problem_out << problem;
   problem_out.close();
 
-  RCLCPP_INFO(lc_node_->get_logger(), "[%s-tfd] called with timeout %d seconds",
+  RCLCPP_INFO(lc_node_->get_logger(), "[%s-tfd] called with timeout %f seconds",
               +lc_node_->get_name(), solver_timeout.seconds());
 
   // Translate the domain and problem files to SAS.
-  const auto output_sas_file_path = output_dir / std::filesystem::path("output.sas");
+  const auto output_sas_file_path = output_dir / fs::path("output.sas");
   status = system((tfd_path_ + "/translate/translate.py " + domain_file_path.string() + " " +
                    problem_file_path.string())
                       .c_str());
@@ -112,7 +146,7 @@ TFDPlanSolver::getPlan(const std::string& domain, const std::string& problem,
   }
 
   // Preprocess the translated files.
-  const auto processed_output_file_path = output_dir / std::filesystem::path("output");
+  const auto processed_output_file_path = output_dir / fs::path("output");
   status =
       system((tfd_path_ + "/preprocess/preprocess < " + output_sas_file_path.string()).c_str());
   if (status == -1)
@@ -128,10 +162,19 @@ TFDPlanSolver::getPlan(const std::string& domain, const std::string& problem,
   }
 
   // Search for a plan using TFD
-  const auto pddlplan_file_path = output_dir / std::filesystem::path("pddlplan");
-  status = system((tfd_path_ + "/search/search y Y a T 10 t 5 e r O 1 C 1 p " +
-                   pddlplan_file_path.string() + " < " + processed_output_file_path.string())
-                      .c_str());
+  const auto pddlplan_file_path = output_dir / fs::path("pddlplan");
+
+  std::string search_param = std::string("/search/search y Y a T ") +
+                             std::to_string(int(solver_timeout.seconds())) + " t 5 e r O " +
+                             std::to_string(generated_plan_num) + std::string(" C 1 p ");
+
+  std::string commandline = std::string(tfd_path_) + std::string(search_param) +
+                            pddlplan_file_path.string() + " < " +
+                            processed_output_file_path.string();
+
+  RCLCPP_INFO(lc_node_->get_logger(), "Command: %s", commandline.c_str());
+
+  status = system(commandline.c_str());
   if (status == -1)
   {
     RCLCPP_ERROR_STREAM(lc_node_->get_logger(), "Failed to search for a plan.");
@@ -210,28 +253,30 @@ bool TFDPlanSolver::isDomainValid(const std::string& domain, const std::string& 
     return false;
   }
 
-  auto output_dir =
-      std::filesystem::path(lc_node_->get_parameter(output_dir_parameter_name_).value_to_string());
+  auto output_dir = fs::path(lc_node_->get_parameter(output_dir_parameter_name_).value_to_string());
 
   if (node_namespace != "")
   {
-    for (auto p : std::filesystem::path(node_namespace))
+    for (auto p : fs::path(node_namespace))
     {
-      if (p != std::filesystem::current_path().root_directory())
+      if (p != fs::current_path().root_directory())
       {
         output_dir /= p;
       }
     }
-    std::filesystem::create_directories(output_dir);
+    fs::create_directories(output_dir);
   }
+
+  output_dir = get_absolute_path(output_dir);
   RCLCPP_INFO(lc_node_->get_logger(), "Writing domain validation results to %s.",
               output_dir.string().c_str());
 
   int status;
   plansys2_msgs::msg::Plan ret;
 
-  const auto domain_file_path = output_dir / std::filesystem::path("domain.pddl");
-  std::ofstream domain_out(domain_file_path);
+  const auto domain_file_path = output_dir / fs::path("domain.pddl");
+
+  std::ofstream domain_out(domain_file_path.c_str());
   domain_out << domain;
   domain_out.close();
 
@@ -247,7 +292,7 @@ bool TFDPlanSolver::isDomainValid(const std::string& domain, const std::string& 
   }
   const std::string domain_name = regex_matches[1];
 
-  const auto problem_file_path = output_dir / std::filesystem::path("problem.pddl");
+  const auto problem_file_path = output_dir / fs::path("problem.pddl");
   std::ofstream problem_out(problem_file_path);
   problem_out << "(define (problem void) (:domain " << domain_name
               << ") (:objects) (:init) (:goal none))";
@@ -255,7 +300,7 @@ bool TFDPlanSolver::isDomainValid(const std::string& domain, const std::string& 
 
   // Translate the domain and problem files to SAS.
   // If this is successful, the domain is considered validated.
-  const auto output_val_file_path = output_dir / std::filesystem::path("output.sas.validation");
+  const auto output_val_file_path = output_dir / fs::path("output.sas.validation");
   status = system((tfd_path_ + "/translate/translate.py " + domain_file_path.string() + " " +
                    problem_file_path.string())
                       .c_str());
