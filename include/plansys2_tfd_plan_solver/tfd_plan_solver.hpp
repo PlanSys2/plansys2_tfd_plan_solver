@@ -19,6 +19,8 @@
 #include <memory>
 #include <string>
 
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "plansys2_core/PlanSolverBase.hpp"
 
 // using namespace std::chrono_literals;
