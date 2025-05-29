@@ -22,6 +22,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
   plansys2_core::plansys2_core
   PRIVATE
   pluginlib::pluginlib
