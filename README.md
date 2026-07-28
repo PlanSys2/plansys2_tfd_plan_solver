@@ -2,7 +2,10 @@
 
 [![GitHub Action
 Status](https://github.com/PlanSys2/plansys2_tfd_plan_solver/workflows/rolling/badge.svg)](https://github.com/PlanSys2/plansys2_tfd_plan_solver/actions/workflows/rolling.yaml)
-[![codecov](https://codecov.io/gh/PlanSys2/plansys2_tfd_plan_solver/branch/rolling/graph/badge.svg)](https://codecov.io/gh/PlanSys2/plansys2_tfd_plan_solver)
+
+[![GitHub Action
+Status](https://github.com/PlanSys2/plansys2_tfd_plan_solver/workflows/lyrical/badge.svg)](https://github.com/PlanSys2/plansys2_tfd_plan_solver/actions/workflows/lyrical.yaml)
+
 
 This package contains a plan solver that uses [Temporal Fast Downward](http://gki.informatik.uni-freiburg.de/tools/tfd/) for solving PDDL plans.
 
