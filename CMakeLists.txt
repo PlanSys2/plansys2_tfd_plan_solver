@@ -1,6 +1,10 @@
+cmake_minimum_required(VERSION 3.5)
+
 project(plansys2_tfd_plan_solver)
 
-cmake_minimum_required(VERSION 3.5)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(Threads REQUIRED)
 
@@ -10,33 +14,37 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 
-set(CMAKE_CXX_STANDARD 17)
-
 add_library(${PROJECT_NAME} SHARED
   src/plansys2_tfd_plan_solver/tfd_plan_solver.cpp
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
 )
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
+  plansys2_core::plansys2_core
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
-  plansys2_core::plansys2_core
   PRIVATE
   pluginlib::pluginlib
 )
 
-install(TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
 install(DIRECTORY include/
   DESTINATION include/${PROJECT_NAME}
+)
+
+install(FILES plansys2_tfd_plan_solver_plugin.xml
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 if(BUILD_TESTING)
@@ -48,9 +56,11 @@ if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
-ament_export_include_directories(include/${PROJECT_NAME})
+pluginlib_export_plugin_description_file(plansys2_core plansys2_tfd_plan_solver_plugin.xml)
+
+ament_export_include_directories("include/${PROJECT_NAME}")
 ament_export_libraries(${PROJECT_NAME})
-ament_export_targets(${PROJECT_NAME})
+ament_export_targets(export_${PROJECT_NAME})
 ament_export_dependencies(
   ament_index_cpp
   plansys2_core
@@ -58,7 +68,5 @@ ament_export_dependencies(
   rclcpp
   rclcpp_lifecycle
 )
-
-pluginlib_export_plugin_description_file(plansys2_core plansys2_tfd_plan_solver_plugin.xml)
 
 ament_package()

@@ -92,8 +92,9 @@ TFDPlanSolver::getPlan(
   problem_out << problem;
   problem_out.close();
 
-  RCLCPP_INFO(lc_node_->get_logger(), "[%s-tfd] called with timeout %d seconds",
-+             lc_node_->get_name(), solver_timeout.seconds());
+  RCLCPP_INFO(
+    lc_node_->get_logger(), "[%s-tfd] called with timeout %f seconds",
+    lc_node_->get_name(), solver_timeout.seconds());
 
   // Translate the domain and problem files to SAS.
   const auto output_sas_file_path = output_dir / std::filesystem::path("output.sas");

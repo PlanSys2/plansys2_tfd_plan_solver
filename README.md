@@ -1,10 +1,12 @@
 # Temporal Fast Downward Plan solver
 
 [![GitHub Action
-Status](https://github.com/IntelligentRoboticsLabs/plansys2_tfd_plan_solver/workflows/master/badge.svg)](https://github.com/IntelligentRoboticsLabs/plansys2_tfd_plan_solver)
-[![codecov](https://codecov.io/gh/IntelligentRoboticsLabs/plansys2_tfd_plan_solver/master/graph/badge.svg)](https://codecov.io/gh/IntelligentRoboticsLabs/plansys2_tfd_plan_solver)
+Status](https://github.com/PlanSys2/plansys2_tfd_plan_solver/workflows/rolling/badge.svg)](https://github.com/PlanSys2/plansys2_tfd_plan_solver/actions/workflows/rolling.yaml)
+[![codecov](https://codecov.io/gh/PlanSys2/plansys2_tfd_plan_solver/branch/rolling/graph/badge.svg)](https://codecov.io/gh/PlanSys2/plansys2_tfd_plan_solver)
 
 This package contains a plan solver that uses [Temporal Fast Downward](http://gki.informatik.uni-freiburg.de/tools/tfd/) for solving PDDL plans.
+
+Use the `rolling` branch to build against ROS 2 Rolling or Lyrical (the CI for this package builds and tests both distributions).
 
 To install Temporal Fast Downward (TFD) to work with PlanSys2:
 
